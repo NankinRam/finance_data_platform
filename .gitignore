@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment
+.env
+
+# Logs
+logs/
+
+# Data Lake
+data/raw/
+data/archive/
+data/processed/
+data/exports/
+
+# PostgreSQL
+docker/postgres/data/
+
+# macOS
+.DS_Store
