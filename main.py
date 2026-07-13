@@ -1,5 +1,9 @@
+from src.bronze import bronze_data
 from src.preparing import preparing_orig_file
 
-if __name__ == '__main__':
+def main():
     path = preparing_orig_file.preparing_raw_file()
-    print(path)
+    bronze_data.load_data(path)
+
+if __name__ == '__main__':
+    main()

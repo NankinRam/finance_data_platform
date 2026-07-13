@@ -1,20 +1,16 @@
 from pathlib import Path
 
-from src.bronze import transfer_bronze
 from src.connect_sql import conn_postgresql
 import pandas as pd
 
-if __name__ == "__main__":
-
-    df = transfer_bronze.refact_exel_to_csv()
+def load_data(path: str):
+    df = pd.read_excel(path)
     df = df.drop("Номер", axis=1)
 
     conn = conn_postgresql.connect()
     cursor = conn.cursor()
 
-    print(df.info())
-
-    query = """    
+    query = """
         INSERT INTO bronze.sber_oper (oper_date, type_oper, category, amount, cur, amount_rub, description, status, card)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """

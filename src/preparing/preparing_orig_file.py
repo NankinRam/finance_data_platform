@@ -1,20 +1,7 @@
 from pathlib import Path
 import shutil
 
-MONTHS = {
-    "янв": 1,
-    "фев": 2,
-    "мар": 3,
-    "апр": 4,
-    "май": 5,
-    "июн": 6,
-    "июл": 7,
-    "авг": 8,
-    "сен": 9,
-    "окт": 10,
-    "ноя": 11,
-    "дек": 12,
-}
+from src.utils import data_parser
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -34,7 +21,7 @@ def preparing_raw_file():
         split_file = name_file.split("_")
 
         day = split_file[1]
-        month = MONTHS[split_file[2]]
+        month = data_parser.months()[split_file[2]]
         year = split_file[3]
 
         new_name_file = f"{year}_{month}_{day}.xlsx"
