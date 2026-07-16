@@ -1,7 +1,8 @@
 from pathlib import Path
 import shutil
-
+import pandas as pd
 from src.utils import data_parser
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -13,16 +14,26 @@ def preparing_raw_file():
 
     files = RAW_ORIGIN_FILE.rglob("*.xlsx")
 
-    new_path = ""
+    df_income = pd.DataFrame
+    df_outcome = pd.DataFrame
+
+    day = ""
+    month = ""
+    year = ""
 
     for file in files:
         name_file = file.name
 
-        split_file = name_file.split("_")
+        split_file = name_file.replace(" ", "_").split("_")
+
+        if split_file[0] == 'income':
+            df_income = pd.read_excel(file)
+        if split_file[0] == 'outcome':
+            df_outcome = pd.read_excel(file)
 
         day = split_file[1]
-        month = data_parser.months()[split_file[2]]
-        year = split_file[3]
+        month = data_parser.months()[split_file[2].replace(".", "")]
+        year = split_file[3].replace(",", "")
 
         new_name_file = f"{year}_{month}_{day}.xlsx"
 
@@ -32,13 +43,42 @@ def preparing_raw_file():
         # Копируем файл в архив
         shutil.copy2(file, new_archive_direct)
 
-        # Создаем новые директории в raw
-        new_raw_direct = RAW_ORIGIN_FILE.parent / f"{year}" / f"{month}" / f"{day}"
-        new_raw_direct.mkdir(parents=True, exist_ok=True)
-        # Переносим файл в raw
-        file = file.rename(new_name_file)
-        shutil.move(file, new_raw_direct)
+        # Удаляем файл
+        file.unlink()
 
-        new_path = new_raw_direct / new_name_file
+    df_income = df_income.rename(columns={'Номер счета/карты зачисления' : 'Номер счета'})
+    df_outcome = df_outcome.rename(columns={'Номер счета/карты списания' : 'Номер счета'})
 
-    return new_path
+    df_all = pd.concat([df_income, df_outcome], ignore_index=True)
+
+    df_all = df_all.sort_values('Дата', ascending=True)
+
+    new_raw_direct = RAW_ORIGIN_FILE.parent / f"{year}" / f"{month}" / f"{day}"
+
+    new_raw_direct.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    df_all.to_excel(
+        new_raw_direct / f"{year}_{month}_{day}.xlsx",
+        index=False
+    )
+
+    return df_all
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
