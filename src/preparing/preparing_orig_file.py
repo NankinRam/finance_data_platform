@@ -1,6 +1,8 @@
 from pathlib import Path
 import shutil
 import pandas as pd
+
+from src.bronze import bronze_data
 from src.utils import data_parser
 
 
@@ -46,12 +48,13 @@ def preparing_raw_file():
         # Удаляем файл
         file.unlink()
 
-    df_income = df_income.rename(columns={'Номер счета/карты зачисления' : 'Номер счета'})
-    df_outcome = df_outcome.rename(columns={'Номер счета/карты списания' : 'Номер счета'})
+    df_income = bronze_data.rename_attribute_df(df_income, 'Номер счета/карты зачисления',
+                                                'Номер счета')
+    df_outcome = bronze_data.rename_attribute_df(df_outcome, 'Номер счета/карты списания',
+                                                 'Номер счета')
 
-    df_all = pd.concat([df_income, df_outcome], ignore_index=True)
-
-    df_all = df_all.sort_values('Дата', ascending=True)
+    df_all = bronze_data.concat_two_df(df_income, df_outcome)
+    df_all = bronze_data.sort_df(df_all, 'Дата')
 
     new_raw_direct = RAW_ORIGIN_FILE.parent / f"{year}" / f"{month}" / f"{day}"
 
