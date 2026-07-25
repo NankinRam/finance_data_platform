@@ -1,19 +1,15 @@
 from pathlib import Path
-
-from src.connect_sql import conn_postgresql
+from src.repository import conn_postgresql, bronze_rep
 import pandas as pd
 
-def load_data(path: str):
-    df = pd.read_excel(path)
+def load_data(df_bronze: pd.DataFrame):
+    df = df_bronze.copy()
     df = df.drop("Номер", axis=1)
 
     conn = conn_postgresql.connect()
     cursor = conn.cursor()
 
-    query = """
-        INSERT INTO bronze.sber_oper (oper_date, type_oper, category, amount, cur, amount_rub, description, status, card)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
+    query = bronze_rep.insert_bronze_sber_oper()
 
     for row in df.itertuples(index=False, name=None):
         cursor.execute(query, row)
