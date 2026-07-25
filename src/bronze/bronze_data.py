@@ -5,7 +5,6 @@ import pandas as pd
 # Загрузка данных в базу
 def load_data(df_bronze: pd.DataFrame):
     df = df_bronze.copy()
-    #df = df.drop("Номер", axis=1)
     df = delete_attribute(df, "Номер")
     bronze_rep.insert_bronze_sber_oper(df)
 

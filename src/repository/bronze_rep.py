@@ -9,7 +9,7 @@ def insert_bronze_sber_oper(df: pd.DataFrame):
 
     conn = conn_postgresql.connect()
     cursor = conn.cursor()
-    
+
     query = """
             INSERT INTO bronze.sber_oper (oper_date, type_oper, category, amount, cur, amount_rub, description, status, \
                                           card)
@@ -23,5 +23,3 @@ def insert_bronze_sber_oper(df: pd.DataFrame):
 
     cursor.close()
     conn.close()
-
-    return query
