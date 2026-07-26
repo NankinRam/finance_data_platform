@@ -3,10 +3,12 @@ from src.repository import conn_postgresql, bronze_rep
 import pandas as pd
 
 # Загрузка данных в базу
-def load_data(df_bronze: pd.DataFrame):
+def load_data(df_bronze: pd.DataFrame, conn):
     df = df_bronze.copy()
     df = delete_attribute(df, "Номер")
-    bronze_rep.insert_bronze_sber_oper(df)
+    bronze_rep.insert_bronze_sber_oper(df, conn)
+
+    return df
 
 
 # Функция объединения двух DataFrame-ов
