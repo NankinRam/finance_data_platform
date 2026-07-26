@@ -1,7 +1,7 @@
 def get_query():
     QUERY = {
         "INSERT_TRN": """
-                      INSERT INTO silver.TRN (date_trn, sum, cur, sum_rub, description, status, card, type_id, categ_id)
+                      INSERT INTO silver.TRN (date_trn, type_id, categ_id, sum, cur, sum_rub, description, status, card)
                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """,
 

@@ -23,7 +23,7 @@ def insert_db(df: pd.DataFrame, conn: pc.connection, type_insert: str):
 # Получение df CATEGORY из БД
 def select_category_db(conn: pc.connection):
     query = """
-            SELECT categ_name \
+            SELECT categ_id, categ_name \
             FROM silver.CATEGORY \
             """
     return pd.read_sql(query, conn)
@@ -32,7 +32,7 @@ def select_category_db(conn: pc.connection):
 # Получение df TYPE_OPER из БД
 def select_type_oper_db(conn: pc.connection):
     query = """
-            SELECT type_name \
+            SELECT type_id, type_name \
             FROM silver.TYPE_OPER \
             """
     return pd.read_sql(query, conn)

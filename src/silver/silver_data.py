@@ -1,14 +1,30 @@
 # Точка входа для обработки silver
-import pandas as pd
+import locale
 
+import pandas as pd
+import locale as lc
 from src.repository import silver_rep
 
+lc.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 def processing_data_silver(df: pd.DataFrame, conn):
     df_silver = df.copy()
 
     create_df_category(df_silver, conn)
     create_df_type_oper(df_silver, conn)
+
+    df_cat = silver_rep.select_category_db(conn)
+    df_type_oper = silver_rep.select_type_oper_db(conn)
+
+    mapping_cat = df_cat.set_index('categ_name')['categ_id']
+    mapping_type_oper = df_type_oper.set_index('type_name')['type_id']
+
+    df_silver['Категория'] = df_silver['Категория'].map(mapping_cat)
+    df_silver['Тип операции'] = df_silver['Тип операции'].map(mapping_type_oper)
+
+    df_silver['Дата'] = pd.to_datetime(df['Дата'], format='%d %b. %Y, %H:%M')
+
+    silver_rep.insert_db(df_silver, conn, 'INSERT_TRN')
 
     return df_silver
 
@@ -29,7 +45,8 @@ def create_df_category(df: pd.DataFrame, conn):
         silver_rep.insert_db(new_df_cat, conn, "INSERT_CATEGORY")
     else:
         df_cat_unik = new_df_cat[~new_df_cat['categ_name'].isin(old_df_cat["categ_name"])]
-        silver_rep.insert_db(df_cat_unik, conn, "INSERT_CATEGORY")
+        if not df_cat_unik.empty:
+            silver_rep.insert_db(df_cat_unik, conn, "INSERT_CATEGORY")
 
 
 # Создание df TYPE_OPER
@@ -46,5 +63,6 @@ def create_df_type_oper(df: pd.DataFrame, conn):
         silver_rep.insert_db(new_df_oper, conn, 'INSERT_TYPE_OPER')
     else:
         df_oper_unik = new_df_oper[~new_df_oper['Тип операции'].isin(old_df_oper['type_name'])]
-        silver_rep.insert_db(df_oper_unik, conn, 'INSERT_TYPE_OPER')
+        if not df_oper_unik.empty:
+            silver_rep.insert_db(df_oper_unik, conn, 'INSERT_TYPE_OPER')
 
