@@ -5,9 +5,8 @@ from psycopg2._psycopg import cursor
 from src.repository import conn_postgresql
 
 
-def insert_bronze_sber_oper(df: pd.DataFrame):
+def insert_bronze_sber_oper(df: pd.DataFrame, conn):
 
-    conn = conn_postgresql.connect()
     cursor = conn.cursor()
 
     query = """
@@ -20,6 +19,4 @@ def insert_bronze_sber_oper(df: pd.DataFrame):
         cursor.execute(query, row)
 
     conn.commit()
-
     cursor.close()
-    conn.close()
