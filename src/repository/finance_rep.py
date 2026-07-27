@@ -1,12 +1,10 @@
 import pandas as pd
 import psycopg2.extensions as pc
-from src.repository import conn_postgresql, type_query
-from dotenv import load_dotenv
-import os
+from psycopg2._psycopg import cursor
 
-load_dotenv()
+from src.repository import type_query
 
-# Загрузка df в таблицу TRN
+
 def insert_db(df: pd.DataFrame, conn: pc.connection, type_insert: str):
     df_new = df.copy()
     cursor = conn.cursor()
@@ -16,9 +14,7 @@ def insert_db(df: pd.DataFrame, conn: pc.connection, type_insert: str):
     for row in df_new.itertuples(index=False, name=None):
         cursor.execute(query, row)
 
-    conn.commit()
     cursor.close()
-
 
 # Получение df CATEGORY из БД
 def select_category_db(conn: pc.connection):

@@ -8,8 +8,8 @@ from src.utils import data_parser
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-RAW_ORIGIN_FILE = BASE_DIR / "data" / "raw" / "original"
-ARCHIVE_ORIGIN_FILE = BASE_DIR / "data" / "archive" / "original"
+RAW_ORIGIN_FILE = BASE_DIR / "data" / "raw" / "origin"
+ARCHIVE_ORIGIN_FILE = BASE_DIR / "data" / "archive" / "origin"
 
 
 def preparing_raw_file():

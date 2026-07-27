@@ -1,12 +1,12 @@
 from pathlib import Path
-from src.repository import conn_postgresql, bronze_rep
+from src.repository import conn_postgresql, finance_rep
 import pandas as pd
 
 # Загрузка данных в базу
 def load_data(df_bronze: pd.DataFrame, conn):
     df = df_bronze.copy()
     df = delete_attribute(df, "Номер")
-    bronze_rep.insert_bronze_sber_oper(df, conn)
+    finance_rep.insert_db(df, conn, 'INSERT_SBER_OPER')
 
     return df
 
