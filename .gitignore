@@ -21,7 +21,7 @@ data/processed/
 data/exports/
 
 # PostgreSQL
-docker/postgres/data/
+docker/
 
 # macOS
 .DS_Store
