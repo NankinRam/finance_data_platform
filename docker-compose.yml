@@ -1,8 +1,13 @@
+version: "3.9"
+
 services:
-  postgres:
+  # ==========================================
+  # PostgreSQL для данных проекта
+  # ==========================================
+  postgres-finance:
     image: postgres:17
 
-    container_name: postgres
+    container_name: postgres-finance
 
     restart: unless-stopped
 
@@ -15,10 +20,77 @@ services:
       - "5433:5432"
 
     volumes:
-      - ./docker/postgres/data:/var/lib/postgresql/data
+      - ./docker/postgres-finance/data:/var/lib/postgresql/data
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U finance -d finance"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  postgres-airflow:
+    image: postgres:17
+
+    container_name: postgres-airflow
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+
+    ports:
+      - "5434:5432"
+
+    volumes:
+      - ./docker/postgres-airflow/data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    image: apache/airflow:3.0.2
+
+    container_name: airflow
+
+    restart: unless-stopped
+
+    depends_on:
+      postgres-airflow:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
+
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      AIRFLOW__CORE__FERNET_KEY: ""
+
+      AIRFLOW_UID: 50000
+
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create
+      --username admin
+      --password admin
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email admin@example.com || true &&
+      airflow standalone
+      "
