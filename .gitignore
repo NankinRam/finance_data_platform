@@ -15,13 +15,13 @@ venv/
 logs/
 
 # Data Lake
-data/raw/
-data/archive/
-data/processed/
-data/exports/
+!data/
+data/*
+!data/.gitkeep
+
 
 # PostgreSQL
-docker/postgres/data/
+docker/
 
 # macOS
 .DS_Store
