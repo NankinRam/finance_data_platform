@@ -3,18 +3,20 @@ import shutil
 import pandas as pd
 
 from src.bronze import bronze_data
+from src.service import minio_service
+from src.service.minio_service import MinioService
 from src.utils import data_parser
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-RAW_ORIGIN_FILE = BASE_DIR / "data" / "raw" / "origin"
-ARCHIVE_ORIGIN_FILE = BASE_DIR / "data" / "archive" / "origin"
-
+DATA_FILE = BASE_DIR / "data"
 
 def preparing_raw_file():
 
-    files = RAW_ORIGIN_FILE.rglob("*.xlsx")
+    minio = MinioService()
+
+    files = DATA_FILE.rglob("*.xlsx")
 
     df_income = pd.DataFrame
     df_outcome = pd.DataFrame
@@ -37,16 +39,8 @@ def preparing_raw_file():
         month = data_parser.months()[split_file[2].replace(".", "")]
         year = split_file[3].replace(",", "")
 
-        new_name_file = f"{year}_{month}_{day}.xlsx"
-
-        # Создаем новые директории в archive
-        new_archive_direct = ARCHIVE_ORIGIN_FILE / f"{year}" / f"{month}" / f"{day}"
-        new_archive_direct.mkdir(parents=True, exist_ok=True)
-        # Копируем файл в архив
-        shutil.copy2(file, new_archive_direct)
-
         # Удаляем файл
-        file.unlink()
+        # file.unlink()
 
     df_income = bronze_data.rename_attribute_df(df_income, 'Номер счета/карты зачисления',
                                                 'Номер счета')
@@ -56,22 +50,11 @@ def preparing_raw_file():
     df_all = bronze_data.concat_two_df(df_income, df_outcome)
     df_all = bronze_data.sort_df(df_all, 'Дата')
 
-    new_raw_direct = RAW_ORIGIN_FILE.parent / f"{year}" / f"{month}" / f"{day}"
+    name_df_in_minio = f"origin/{year}_{month}_{day}.csv"
 
-    new_raw_direct.mkdir(
-        parents=True,
-        exist_ok=True
-    )
+    minio.load_df(name_df_in_minio, df_all)
 
-    df_all.to_excel(
-        new_raw_direct / f"{year}_{month}_{day}.xlsx",
-        index=False
-    )
-
-    return df_all
-
-
-
+    return name_df_in_minio
 
 
 

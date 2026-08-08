@@ -1,14 +1,25 @@
 # Точка входа для обработки silver
+import io
 import locale
+from pathlib import PurePosixPath
 
 import pandas as pd
 import locale as lc
 from src.repository import finance_rep
+from src.service.minio_service import MinioService
 
 lc.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
-def processing_data_silver(df: pd.DataFrame, conn):
-    df_silver = df.copy()
+
+def processing_data_silver(path_minio: str, conn):
+    minio = MinioService()
+    response = minio.unload_df(f"{path_minio}")
+
+    try:
+        df_silver = pd.read_csv(io.BytesIO(response.read()))
+    finally:
+        response.close()
+        response.release_conn()
 
     create_df_category(df_silver, conn)
     create_df_type_oper(df_silver, conn)
@@ -22,11 +33,9 @@ def processing_data_silver(df: pd.DataFrame, conn):
     df_silver['Категория'] = df_silver['Категория'].map(mapping_cat)
     df_silver['Тип операции'] = df_silver['Тип операции'].map(mapping_type_oper)
 
-    df_silver['Дата'] = pd.to_datetime(df['Дата'], format='%d %b. %Y, %H:%M')
+    df_silver['Дата'] = pd.to_datetime(df_silver['Дата'], format='%d %b. %Y, %H:%M')
 
     finance_rep.insert_db(df_silver, conn, 'INSERT_TRN')
-
-    return df_silver
 
 
 # Создание df CATEGORY
